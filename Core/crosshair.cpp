@@ -29,7 +29,6 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
             if (crosshairMode == 1) // 1. DOT
             {
-                // Gunakan currentColor untuk isi (Brush) dan garis tepi (Pen)
                 HBRUSH hBrush = CreateSolidBrush(currentColor);
                 HPEN hPen = CreatePen(PS_SOLID, 1, currentColor);
 

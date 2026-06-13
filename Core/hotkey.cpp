@@ -79,14 +79,12 @@ void HotkeyThread()
             if (!isF5Held)
             {
                 isF5Held = true;
-                crosshairColorIndex++; // Naikkan indeks warna
+                crosshairColorIndex++;
 
-                // Jika sudah melewati batas warna terakhir (5), kembali ke awal (0)
                 if (crosshairColorIndex > 5) {
                     crosshairColorIndex = 0;
                 }
 
-                // Opsional: Jika ada UI Text untuk warna, update teksnya
                 if (hTextCrosshairColor)
                 {
                     std::string colorName = "";

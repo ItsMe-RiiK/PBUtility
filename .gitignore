@@ -4,9 +4,3 @@ Release/
 Debug/
 Temp/
 *.user
-
-# Visual Studio Resource Compiler Temp Files
-RCa*
-RCb*
-RCc*
-RCd*

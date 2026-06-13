@@ -11,7 +11,7 @@ Currently work for Point Blank, and perhaps for mostly fps games
 
 ## How to use:
 - clone the repo git clone https://github.com/ItsMe-RiiK/PBUtility.git
-- open slnx file to go the visual studio
+- open slnx file to go to the visual studio
 - retarget all and apply
 - change to Release x64 if needed
 - build the solution
