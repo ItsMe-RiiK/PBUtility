@@ -47,18 +47,10 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
                 POINT ketupat[4] =
                 {
-                    {
-                        centerX, centerY - r
-                    },
-                    {
-                        centerX + r, centerY
-                    },
-                    {
-                        centerX, centerY + r
-                    },
-                    {
-                        centerX - r, centerY
-                    }
+                    { centerX, centerY - r },
+                    { centerX + r, centerY },
+                    { centerX, centerY + r },
+                    { centerX - r, centerY }
                 };
 
                 Polygon(hdc, ketupat, 4);
@@ -75,17 +67,17 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
                 int len = 10;
                 int th = 1;
 
-				// offset var for each line (Horizontal & Vertical) to allow independent adjustment if needed
+                // offset var for each line (Horizontal & Vertical) to allow independent adjustment if needed
                 int offsetX_H = 0, offsetY_H = 0;
                 int offsetX_V = 0, offsetY_V = 0;
 
-				// Settings for Length, Thickness, & Offset position for Crosshair plus based on Window Mode or Fullscreen Mode
+                // Settings for Length, Thickness, & Offset position for Crosshair plus based on Window Mode or Fullscreen Mode
                 if (isGameWindowed)
                 {
                     len = 9;  // Length (WINDOW MODE)
                     th = 1;   // Thickness (WINDOW MODE)
 
-					// Move Horizontal line slightly right in Window mode to better align with typical game crosshair positioning
+                    // Move Horizontal line slightly right in Window mode to better align with typical game crosshair positioning
                     offsetX_H = 0;
                     offsetY_H = 1;
 
@@ -98,33 +90,27 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
                     len = 11; // Length (FULLSCREEN MODE)
                     th = 1;   // Thickness (FULLSCREEN MODE)
 
-					// Move Horizontal line slightly right in Fullscreen mode to better align with typical game crosshair positioning
+                    // Move Horizontal line slightly right in Fullscreen mode to better align with typical game crosshair positioning
                     offsetX_H = 0;
                     offsetY_H = 0;
 
-					// Move Vertical line slightly down in Fullscreen mode to better align with typical game crosshair positioning
+                    // Move Vertical line slightly down in Fullscreen mode to better align with typical game crosshair positioning
                     offsetX_V = 1;
                     offsetY_V = 0;
                 }
 
-				// Calculate center positions for Horizontal and Vertical lines with respective offsets
+                // Calculate center positions for Horizontal and Vertical lines with respective offsets
                 int cxH = centerX + offsetX_H;
                 int cyH = centerY + offsetY_H;
 
                 int cxV = centerX + offsetX_V;
                 int cyV = centerY + offsetY_V;
 
-				// Draw Horizontal line
-                RECT rectH =
-                {
-                    cxH - len, cyH - th, cxH + len + 1, cyH + th
-                };
+                // Draw Horizontal line
+                RECT rectH = { cxH - len, cyH - th, cxH + len + 1, cyH + th };
 
-				// Draw Vertical line
-                RECT rectV =
-                {
-                    cxV - th, cyV - len, cxV + th, cyV + len + 1
-                };
+                // Draw Vertical line
+                RECT rectV = { cxV - th, cyV - len, cxV + th, cyV + len + 1 };
 
                 FillRect(hdc, &rectH, hBrush);
                 FillRect(hdc, &rectV, hBrush);
@@ -155,6 +141,9 @@ void CrosshairThread()
 
     SetLayeredWindowAttributes(overlayHWND, RGB(0, 0, 0), 0, LWA_COLORKEY);
 
+    HWND gameHwnd = NULL;
+    int checkCounter = 100;
+
     while (true)
     {
         MSG msg;
@@ -172,8 +161,13 @@ void CrosshairThread()
             lastColorState = crosshairColorIndex;
         }
 
-        HWND gameHwnd = FindWindowA(NULL, TARGET_WINDOW_CH);
+        if (checkCounter++ >= 100)
+        {
+            gameHwnd = FindWindowA(NULL, TARGET_WINDOW_CH);
+            checkCounter = 0;
+        }
 
+        // Pengecekan status Window aktif (Ringan)
         if (showCrosshair && gameHwnd != NULL && gameHwnd == GetForegroundWindow())
         {
             RECT rect;
