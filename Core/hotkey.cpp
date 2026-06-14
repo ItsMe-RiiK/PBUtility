@@ -88,13 +88,14 @@ void HotkeyThread()
                 if (hTextCrosshairColor)
                 {
                     std::string colorName = "";
-                    switch (crosshairColorIndex) {
-                    case 0: colorName = "Green"; break;
-                    case 1: colorName = "Red"; break;
-                    case 2: colorName = "Cyan"; break;
-                    case 3: colorName = "Yellow"; break;
-                    case 4: colorName = "Magenta"; break;
-                    case 5: colorName = "White"; break;
+                    switch (crosshairColorIndex)
+                    {
+                        case 0: colorName = "Green"; break;
+                        case 1: colorName = "Red"; break;
+                        case 2: colorName = "Cyan"; break;
+                        case 3: colorName = "Yellow"; break;
+                        case 4: colorName = "Magenta"; break;
+                        case 5: colorName = "White"; break;
                     }
                     std::string txt = "Color: " + colorName;
                     SetWindowTextA(hTextCrosshairColor, txt.c_str());

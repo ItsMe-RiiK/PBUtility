@@ -1,10 +1,9 @@
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include "core.h"
 
 const char* TARGET_WINDOW_CH = "Point Blank";
 
-const COLORREF chColors[6] = {
+const COLORREF chColors[6] =
+{
     RGB(0, 255, 0),
     RGB(255, 0, 0),
     RGB(0, 255, 255),
@@ -35,13 +34,31 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
                 HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
                 HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
-                int r = 2;
+                // --- Setting Thickness for DOT ---
+                int r = 2; // Default
+                if (isGameWindowed)
+                {
+                    r = 3; // Thickness DOT (WINDOW MODE)
+                }
+                else
+                {
+                    r = 3; // Thickness DOT (FULLSCREEN MODE)
+                }
 
-                POINT ketupat[4] = {
-                    { centerX, centerY - r },
-                    { centerX + r, centerY },
-                    { centerX, centerY + r },
-                    { centerX - r, centerY }
+                POINT ketupat[4] =
+                {
+                    {
+                        centerX, centerY - r
+                    },
+                    {
+                        centerX + r, centerY
+                    },
+                    {
+                        centerX, centerY + r
+                    },
+                    {
+                        centerX - r, centerY
+                    }
                 };
 
                 Polygon(hdc, ketupat, 4);
@@ -51,14 +68,63 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
                 DeleteObject(hBrush);
                 DeleteObject(hPen);
             }
-            else if (crosshairMode == 2) // 2. PLUS
+            else if (crosshairMode == 2) // 2. PLUS 
             {
                 HBRUSH hBrush = CreateSolidBrush(currentColor);
+                // default thickness and length
+                int len = 10;
+                int th = 1;
 
-                int lineLen = isGameWindowed ? 10 : 11;
+				// offset var for each line (Horizontal & Vertical) to allow independent adjustment if needed
+                int offsetX_H = 0, offsetY_H = 0;
+                int offsetX_V = 0, offsetY_V = 0;
 
-                RECT rectH = { centerX - lineLen, centerY - 1, centerX + lineLen + 1, centerY + 1 };
-                RECT rectV = { centerX - 1, centerY - lineLen, centerX + 1, centerY + lineLen + 1 };
+				// Settings for Length, Thickness, & Offset position for Crosshair plus based on Window Mode or Fullscreen Mode
+                if (isGameWindowed)
+                {
+                    len = 9;  // Length (WINDOW MODE)
+                    th = 1;   // Thickness (WINDOW MODE)
+
+					// Move Horizontal line slightly right in Window mode to better align with typical game crosshair positioning
+                    offsetX_H = 0;
+                    offsetY_H = 1;
+
+                    // Move Vertical line slightly down in Window mode to better align with typical game crosshair positioning
+                    offsetX_V = 1;
+                    offsetY_V = 0;
+                }
+                else
+                {
+                    len = 11; // Length (FULLSCREEN MODE)
+                    th = 1;   // Thickness (FULLSCREEN MODE)
+
+					// Move Horizontal line slightly right in Fullscreen mode to better align with typical game crosshair positioning
+                    offsetX_H = 0;
+                    offsetY_H = 0;
+
+					// Move Vertical line slightly down in Fullscreen mode to better align with typical game crosshair positioning
+                    offsetX_V = 1;
+                    offsetY_V = 0;
+                }
+
+				// Calculate center positions for Horizontal and Vertical lines with respective offsets
+                int cxH = centerX + offsetX_H;
+                int cyH = centerY + offsetY_H;
+
+                int cxV = centerX + offsetX_V;
+                int cyV = centerY + offsetY_V;
+
+				// Draw Horizontal line
+                RECT rectH =
+                {
+                    cxH - len, cyH - th, cxH + len + 1, cyH + th
+                };
+
+				// Draw Vertical line
+                RECT rectV =
+                {
+                    cxV - th, cyV - len, cxV + th, cyV + len + 1
+                };
 
                 FillRect(hdc, &rectH, hBrush);
                 FillRect(hdc, &rectV, hBrush);
@@ -118,13 +184,42 @@ void CrosshairThread()
             LONG windowStyle = GetWindowLong(gameHwnd, GWL_STYLE);
             bool currentWindowMode = (windowStyle & WS_CAPTION) != 0;
 
-            if (isGameWindowed != currentWindowMode) {
+            if (isGameWindowed != currentWindowMode)
+            {
                 isGameWindowed = currentWindowMode;
                 InvalidateRect(overlayHWND, NULL, TRUE);
             }
 
-            int offsetX = currentWindowMode ? 1 : 0;
-            int offsetY = currentWindowMode ? 1 : 0;
+            int offsetX = 0;
+            int offsetY = 0;
+
+            // Settings for Position (Overall Coordinates)
+            if (currentWindowMode)
+            {
+                if (crosshairMode == 1)
+                { // 1. DOT in WINDOW MODE
+                    offsetX = 1;
+                    offsetY = 1;
+                }
+                else if (crosshairMode == 2)
+                { // 2. PLUS in WINDOW MODE
+                    offsetX = 1;
+                    offsetY = 1;
+                }
+            }
+            else
+            { // FULLSCREEN / FULL WINDOW MODE
+                if (crosshairMode == 1)
+                { // 3. DOT in FULLSCREEN MODE
+                    offsetX = 0;
+                    offsetY = 0;
+                }
+                else if (crosshairMode == 2)
+                { // 4. PLUS in FULLSCREEN MODE
+                    offsetX = 0;
+                    offsetY = 1;
+                }
+            }
 
             int targetX = pt.x - 20 + offsetX;
             int targetY = pt.y - 20 + offsetY;

@@ -1,7 +1,8 @@
 #include "core.h"
 #include <thread>
 
-void StartMacroEngine() {
+void StartMacroEngine()
+{
     std::thread t1(MacroThread);
     t1.detach();
 

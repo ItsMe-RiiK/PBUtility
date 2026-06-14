@@ -6,65 +6,66 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 {
     switch (uMsg)
     {
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        if (wmId == 1)
+        case WM_COMMAND:
         {
-            macroEnabled = (SendMessage(hBtnMacro, BM_GETCHECK, 0, 0) == BST_CHECKED);
-        }
-        else if (wmId == 5)
-        {
-            showCrosshair = (SendMessage(hBtnCrosshairToggle, BM_GETCHECK, 0, 0) == BST_CHECKED);
-        }
-        else if (wmId == 2)
-        {
-            crosshairMode = (crosshairMode == 1) ? 2 : 1;
-            std::string txt = "Crosshair: " + std::string(crosshairMode == 1 ? "DOT" : "PLUS");
-            SetWindowTextA(hTextCrosshairMode, txt.c_str());
-        }
-        else if (wmId == 3)
-        {
-            macroMode = (macroMode == 1) ? 2 : 1;
-            std::string modeText = "Macro Mode: " + std::string(macroMode == 1 ? "Scope 3Q" : "3Q");
-            SetWindowTextA(hTextMode, modeText.c_str());
-        }
-        else if (wmId == 6)
-        {
-            crosshairColorIndex++;
-            if (crosshairColorIndex > 5) crosshairColorIndex = 0;
+            int wmId = LOWORD(wParam);
+            if (wmId == 1)
+            {
+                macroEnabled = (SendMessage(hBtnMacro, BM_GETCHECK, 0, 0) == BST_CHECKED);
+            }
+            else if (wmId == 5)
+            {
+                showCrosshair = (SendMessage(hBtnCrosshairToggle, BM_GETCHECK, 0, 0) == BST_CHECKED);
+            }
+            else if (wmId == 2)
+            {
+                crosshairMode = (crosshairMode == 1) ? 2 : 1;
+                std::string txt = "Crosshair: " + std::string(crosshairMode == 1 ? "DOT" : "PLUS");
+                SetWindowTextA(hTextCrosshairMode, txt.c_str());
+            }
+            else if (wmId == 3)
+            {
+                macroMode = (macroMode == 1) ? 2 : 1;
+                std::string modeText = "Macro Mode: " + std::string(macroMode == 1 ? "Scope 3Q" : "3Q");
+                SetWindowTextA(hTextMode, modeText.c_str());
+            }
+            else if (wmId == 6)
+            {
+                crosshairColorIndex++;
+                if (crosshairColorIndex > 5) crosshairColorIndex = 0;
 
-            std::string colorName = "";
-            switch (crosshairColorIndex) {
-            case 0: colorName = "Green"; break;
-            case 1: colorName = "Red"; break;
-            case 2: colorName = "Cyan"; break;
-            case 3: colorName = "Yellow"; break;
-            case 4: colorName = "Magenta"; break;
-            case 5: colorName = "White"; break;
+                std::string colorName = "";
+                switch (crosshairColorIndex)
+                {
+                    case 0: colorName = "Green"; break;
+                    case 1: colorName = "Red"; break;
+                    case 2: colorName = "Cyan"; break;
+                    case 3: colorName = "Yellow"; break;
+                    case 4: colorName = "Magenta"; break;
+                    case 5: colorName = "White"; break;
+                }
+                std::string txt = "Color: " + colorName;
+                SetWindowTextA(hTextCrosshairColor, txt.c_str());
             }
-            std::string txt = "Color: " + colorName;
-            SetWindowTextA(hTextCrosshairColor, txt.c_str());
-        }
-        else if (wmId == 4)
-        {
-            char buffer[10];
-            GetWindowTextA(hInputDelay, buffer, 10);
-            int newDelay = atoi(buffer);
-            if (newDelay >= 5)
+            else if (wmId == 4)
             {
-                delayMs = newDelay;
-                MessageBoxA(hwnd, ("Delay set to " + std::to_string(delayMs) + "ms").c_str(), "Success", MB_OK);
+                char buffer[10];
+                GetWindowTextA(hInputDelay, buffer, 10);
+                int newDelay = atoi(buffer);
+                if (newDelay >= 5)
+                {
+                    delayMs = newDelay;
+                    MessageBoxA(hwnd, ("Delay set to " + std::to_string(delayMs) + "ms").c_str(), "Success", MB_OK);
+                }
+                else
+                {
+                    MessageBoxA(hwnd, "Minimal delay is 5ms!", "Error", MB_OK | MB_ICONERROR);
+                    SetWindowTextA(hInputDelay, std::to_string(delayMs).c_str());
+                }
             }
-            else
-            {
-                MessageBoxA(hwnd, "Minimal delay is 5ms!", "Error", MB_OK | MB_ICONERROR);
-                SetWindowTextA(hInputDelay, std::to_string(delayMs).c_str());
-            }
+            break;
         }
-        break;
-    }
-    case WM_DESTROY:
+        case WM_DESTROY:
         PostQuitMessage(0);
         return 0;
     }

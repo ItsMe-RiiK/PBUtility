@@ -6,7 +6,7 @@
 
 Currently work for Point Blank, and perhaps for mostly fps games
 
-## prerequisite
+## Prerequisite
 - Visual studio with C/C++ development kit
 
 ## How to use:
@@ -19,7 +19,7 @@ Currently work for Point Blank, and perhaps for mostly fps games
 
 The application.exe would appear in Release folder
 
-## the hotkeys:
+## Hotkeys:
 - f1 to enable/disable macro
 - f2 to enable/disable crosshair
 - f3 to change macro mode (3Q Scope or just 3Q)

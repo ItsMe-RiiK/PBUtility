@@ -46,7 +46,10 @@ void MacroThread()
                             SendKey(0x51);
                         }
                     }
-                    else { isRightHeld = false; }
+                    else
+                    {
+                        isRightHeld = false;
+                    }
                 }
                 else if (macroMode == 2)
                 {
@@ -61,7 +64,10 @@ void MacroThread()
                             SendKey(0x51);
                         }
                     }
-                    else { isLeftHeld = false; }
+                    else
+                    {
+                        isLeftHeld = false;
+                    }
                 }
             }
         }
