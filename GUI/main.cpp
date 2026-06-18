@@ -7,6 +7,53 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 {
     switch (uMsg)
     {
+        case WM_TIMER:
+        {
+            if (wParam == 1)
+            {
+                HWND gameHwnd = FindWindowA(NULL, targetWindow.c_str());
+                bool attached = (gameHwnd != NULL);
+                
+                pbGameHwnd = gameHwnd;
+
+                if (attached != isGameAttached)
+                {
+                    isGameAttached = attached;
+                    if (isGameAttached)
+                    {
+                        GetWindowThreadProcessId(pbGameHwnd, &pbProcessId);
+                        SetWindowTextA(hStatusLabel, XOR("Status: Point Blank Detected!"));
+                    }
+                    else
+                    {
+                        pbProcessId = 0;
+                        SetWindowTextA(hStatusLabel, XOR("Status: Waiting for Point Blank..."));
+                    }
+
+                    InvalidateRect(hStatusLabel, NULL, TRUE);
+                }
+            }
+            break;
+        }
+        case WM_CTLCOLORSTATIC:
+        {
+            HDC hdcStatic = (HDC)wParam;
+            HWND hwndStatic = (HWND)lParam;
+
+            if (hwndStatic == hStatusLabel)
+            {
+                SetBkMode(hdcStatic, TRANSPARENT);
+
+                if (isGameAttached)
+                    SetTextColor(hdcStatic, RGB(0, 180, 0));
+                else
+                    SetTextColor(hdcStatic, RGB(220, 0, 0));
+
+                return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
+            }
+
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        }
         case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -32,7 +79,6 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
             {
                 macroMode = (macroMode == 1) ? 2 : 1;
 
-                // FIX: Hindari ternary operator untuk XOR
                 std::string modeText = XOR("Macro Mode: ");
                 if (macroMode == 1) modeText += XOR("Scope 3Q");
                 else modeText += XOR("3Q");
@@ -105,11 +151,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     HWND hwnd = CreateWindowExA(
         0, className.c_str(), windowTitle.c_str(),
         WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX,
-        CW_USEDEFAULT, CW_USEDEFAULT, 420, 375,
+        CW_USEDEFAULT, CW_USEDEFAULT, 420, 395,
         NULL, NULL, hInstance, NULL
     );
 
     if (hwnd == NULL) return 0;
+
+    HRGN hRgn = CreateRoundRectRgn(0, 0, 420, 395, 15, 15);
+    SetWindowRgn(hwnd, hRgn, TRUE);
 
     hBtnMacro = CreateWindowA(XOR("BUTTON"), XOR("Enable Macro (F1)"),
         WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
@@ -159,6 +208,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
         210, 272, 50, 22, hwnd, (HMENU)4, hInstance, NULL);
 
+    hStatusLabel = CreateWindowA(XOR("STATIC"), XOR("Status: Waiting for Point Blank..."),
+        WS_VISIBLE | WS_CHILD | SS_CENTER,
+        20, 320, 360, 20, hwnd, NULL, hInstance, NULL);
+
+    SetTimer(hwnd, 1, 1500, NULL);
+
     hUIDelay = hInputDelay;
     hUIMacroMode = hTextMode;
     hUICrosshairMode = hTextCrosshairMode;
@@ -171,5 +226,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    KillTimer(hwnd, 1);
     return 0;
 }

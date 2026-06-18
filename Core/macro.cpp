@@ -32,24 +32,14 @@ static void SendMouseClick(DWORD dwDown, DWORD dwUp)
 
 void MacroThread()
 {
-    std::string targetWindow = XOR("Point Blank");
-
     bool isLeftHeld = false;
     bool isRightHeld = false;
-
-    HWND gameHwnd = NULL;
-    int checkCounter = 1000;
 
     while (true)
     {
         Sleep(1);
-        if (checkCounter++ >= 1000)
-        {
-            gameHwnd = FindWindowA(NULL, targetWindow.c_str());
-            checkCounter = 0;
-        }
 
-        if (gameHwnd != NULL && gameHwnd == GetForegroundWindow())
+        if (pbGameHwnd != NULL && pbGameHwnd == GetForegroundWindow())
         {
             if (macroEnabled)
             {

@@ -99,28 +99,24 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 void CrosshairThread()
 {
-    std::string className = XOR("SmartCrosshairOverlay");
-    std::string windowName = XOR("SmartCrosshair");
-    std::string targetWindow = XOR("Point Blank");
-
     WNDCLASSA wc = { 0 };
     wc.lpfnWndProc = OverlayProc;
     wc.hInstance = GetModuleHandle(NULL);
-    wc.lpszClassName = className.c_str();
+    wc.lpszClassName = overlayClassName.c_str();
     wc.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
     RegisterClassA(&wc);
 
     overlayHWND = CreateWindowExA(
         WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW,
-        className.c_str(), windowName.c_str(), WS_POPUP,
+        overlayClassName.c_str(), overlayWindowName.c_str(), WS_POPUP,
         0, 0, 40, 40,
         NULL, NULL, wc.hInstance, NULL
     );
 
     SetLayeredWindowAttributes(overlayHWND, RGB(0, 0, 0), 0, LWA_COLORKEY);
 
-    HWND gameHwnd = NULL;
-    int checkCounter = 100;
+    int lastTargetX = -1;
+    int lastTargetY = -1;
 
     while (true)
     {
@@ -139,26 +135,21 @@ void CrosshairThread()
             lastColorState = crosshairColorIndex;
         }
 
-        if (checkCounter++ >= 100)
-        {
-            gameHwnd = FindWindowA(NULL, targetWindow.c_str());
-            checkCounter = 0;
-        }
-
-        if (showCrosshair && gameHwnd != NULL && gameHwnd == GetForegroundWindow())
+        if (showCrosshair && pbGameHwnd != NULL && pbGameHwnd == GetForegroundWindow())
         {
             RECT rect;
-            GetClientRect(gameHwnd, &rect);
+            GetClientRect(pbGameHwnd, &rect);
             POINT pt = { (rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2 };
-            ClientToScreen(gameHwnd, &pt);
+            ClientToScreen(pbGameHwnd, &pt);
 
-            LONG windowStyle = GetWindowLong(gameHwnd, GWL_STYLE);
+            LONG windowStyle = GetWindowLong(pbGameHwnd, GWL_STYLE);
             bool currentWindowMode = (windowStyle & WS_CAPTION) != 0;
 
             if (isGameWindowed != currentWindowMode)
             {
                 isGameWindowed = currentWindowMode;
                 InvalidateRect(overlayHWND, NULL, TRUE);
+                lastTargetX = -1;
             }
 
             int offsetX = 0;
@@ -190,7 +181,16 @@ void CrosshairThread()
             int targetX = pt.x - 20 + offsetX;
             int targetY = pt.y - 20 + offsetY;
 
-            SetWindowPos(overlayHWND, HWND_TOPMOST, targetX, targetY, 40, 40, SWP_SHOWWINDOW);
+            if (targetX != lastTargetX || targetY != lastTargetY)
+            {
+                SetWindowPos(overlayHWND, HWND_TOPMOST, targetX, targetY, 40, 40, SWP_SHOWWINDOW);
+                lastTargetX = targetX;
+                lastTargetY = targetY;
+            }
+            else
+            {
+                ShowWindow(overlayHWND, SW_SHOWNA);
+            }
         }
         else
         {

@@ -1,7 +1,7 @@
 # Utility for Point Blank Zepetto ID
 
 ## Features:
-- Macro (3Q scope {use RightClick to trigger 3Q Scope. the trigger itself is open scope then automatically fire} & 3Q)
+- Macro (3Q scope (the scope trigger itself is open scope then automatically fire) & 3Q)
 - Crosshair with various color
 - NameTag Enemy
 
