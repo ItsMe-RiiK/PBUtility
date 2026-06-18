@@ -1,4 +1,4 @@
-#include "core.h"
+#include "core.hpp"
 
 bool macroEnabled = false;
 int macroMode = 1;
@@ -8,6 +8,9 @@ bool showCrosshair = false;
 int crosshairMode = 1;
 int crosshairColorIndex = 0;
 bool isGameWindowed = true;
+
+bool espNameEnabled = false;
+HWND hBtnEspName = NULL;
 
 HWND hUIDelay = NULL;
 HWND hUIMacroMode = NULL;

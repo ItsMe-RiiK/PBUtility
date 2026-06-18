@@ -3,6 +3,7 @@
 ## Features:
 - Macro (3Q scope {use RightClick to trigger 3Q Scope. the trigger itself is open scope then automatically fire} & 3Q)
 - Crosshair with various color
+- NameTag Enemy
 
 Currently work for Point Blank, and perhaps for mostly fps games
 

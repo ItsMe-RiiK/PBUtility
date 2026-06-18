@@ -1,6 +1,6 @@
-#include "core.h"
-
-const char* TARGET_WINDOW_CH = "Point Blank";
+#include "core.hpp"
+#include "XOR.hpp"
+#include <string>
 
 const COLORREF chColors[6] =
 {
@@ -34,16 +34,9 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
                 HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
                 HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
-                // --- Setting Thickness for DOT ---
                 int r = 2; // Default
-                if (isGameWindowed)
-                {
-                    r = 3; // Thickness DOT (WINDOW MODE)
-                }
-                else
-                {
-                    r = 3; // Thickness DOT (FULLSCREEN MODE)
-                }
+                if (isGameWindowed) r = 3;
+                else r = 3;
 
                 POINT ketupat[4] =
                 {
@@ -63,53 +56,34 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
             else if (crosshairMode == 2) // 2. PLUS 
             {
                 HBRUSH hBrush = CreateSolidBrush(currentColor);
-                // default thickness and length
                 int len = 10;
                 int th = 1;
 
-                // offset var for each line (Horizontal & Vertical) to allow independent adjustment if needed
                 int offsetX_H = 0, offsetY_H = 0;
                 int offsetX_V = 0, offsetY_V = 0;
 
-                // Settings for Length, Thickness, & Offset position for Crosshair plus based on Window Mode or Fullscreen Mode
                 if (isGameWindowed)
                 {
-                    len = 9;  // Length (WINDOW MODE)
-                    th = 1;   // Thickness (WINDOW MODE)
-
-                    // Move Horizontal line slightly right in Window mode to better align with typical game crosshair positioning
-                    offsetX_H = 0;
-                    offsetY_H = 1;
-
-                    // Move Vertical line slightly down in Window mode to better align with typical game crosshair positioning
-                    offsetX_V = 1;
-                    offsetY_V = 0;
+                    len = 9;
+                    th = 1;
+                    offsetX_H = 0; offsetY_H = 1;
+                    offsetX_V = 1; offsetY_V = 0;
                 }
                 else
                 {
-                    len = 11; // Length (FULLSCREEN MODE)
-                    th = 1;   // Thickness (FULLSCREEN MODE)
-
-                    // Move Horizontal line slightly right in Fullscreen mode to better align with typical game crosshair positioning
-                    offsetX_H = 0;
-                    offsetY_H = 0;
-
-                    // Move Vertical line slightly down in Fullscreen mode to better align with typical game crosshair positioning
-                    offsetX_V = 1;
-                    offsetY_V = 0;
+                    len = 11;
+                    th = 1;
+                    offsetX_H = 0; offsetY_H = 0;
+                    offsetX_V = 1; offsetY_V = 0;
                 }
 
-                // Calculate center positions for Horizontal and Vertical lines with respective offsets
                 int cxH = centerX + offsetX_H;
                 int cyH = centerY + offsetY_H;
 
                 int cxV = centerX + offsetX_V;
                 int cyV = centerY + offsetY_V;
 
-                // Draw Horizontal line
                 RECT rectH = { cxH - len, cyH - th, cxH + len + 1, cyH + th };
-
-                // Draw Vertical line
                 RECT rectV = { cxV - th, cyV - len, cxV + th, cyV + len + 1 };
 
                 FillRect(hdc, &rectH, hBrush);
@@ -125,16 +99,20 @@ static LRESULT CALLBACK OverlayProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 void CrosshairThread()
 {
+    std::string className = XOR("SmartCrosshairOverlay");
+    std::string windowName = XOR("SmartCrosshair");
+    std::string targetWindow = XOR("Point Blank");
+
     WNDCLASSA wc = { 0 };
     wc.lpfnWndProc = OverlayProc;
     wc.hInstance = GetModuleHandle(NULL);
-    wc.lpszClassName = "SmartCrosshairOverlay";
+    wc.lpszClassName = className.c_str();
     wc.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
     RegisterClassA(&wc);
 
     overlayHWND = CreateWindowExA(
         WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW,
-        wc.lpszClassName, "SmartCrosshair", WS_POPUP,
+        className.c_str(), windowName.c_str(), WS_POPUP,
         0, 0, 40, 40,
         NULL, NULL, wc.hInstance, NULL
     );
@@ -163,11 +141,10 @@ void CrosshairThread()
 
         if (checkCounter++ >= 100)
         {
-            gameHwnd = FindWindowA(NULL, TARGET_WINDOW_CH);
+            gameHwnd = FindWindowA(NULL, targetWindow.c_str());
             checkCounter = 0;
         }
 
-        // Pengecekan status Window aktif (Ringan)
         if (showCrosshair && gameHwnd != NULL && gameHwnd == GetForegroundWindow())
         {
             RECT rect;
@@ -187,31 +164,26 @@ void CrosshairThread()
             int offsetX = 0;
             int offsetY = 0;
 
-            // Settings for Position (Overall Coordinates)
             if (currentWindowMode)
             {
                 if (crosshairMode == 1)
-                { // 1. DOT in WINDOW MODE
-                    offsetX = 1;
-                    offsetY = 1;
+                {
+                    offsetX = 1; offsetY = 1;
                 }
                 else if (crosshairMode == 2)
-                { // 2. PLUS in WINDOW MODE
-                    offsetX = 1;
-                    offsetY = 1;
+                {
+                    offsetX = 1; offsetY = 1;
                 }
             }
             else
-            { // FULLSCREEN / FULL WINDOW MODE
+            {
                 if (crosshairMode == 1)
-                { // 3. DOT in FULLSCREEN MODE
-                    offsetX = 0;
-                    offsetY = 0;
+                {
+                    offsetX = 0; offsetY = 0;
                 }
                 else if (crosshairMode == 2)
-                { // 4. PLUS in FULLSCREEN MODE
-                    offsetX = 0;
-                    offsetY = 1;
+                {
+                    offsetX = 0; offsetY = 1;
                 }
             }
 

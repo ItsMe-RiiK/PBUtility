@@ -11,6 +11,10 @@ extern int crosshairMode;
 extern int crosshairColorIndex;
 extern bool isGameWindowed;
 
+extern bool espNameEnabled;
+extern HWND hBtnEspName;
+extern void ToggleNameTagESP(bool enable);
+
 extern HWND hUIDelay;
 extern HWND hUIMacroMode;
 extern HWND hUICrosshairMode;

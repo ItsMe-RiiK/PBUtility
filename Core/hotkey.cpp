@@ -1,10 +1,11 @@
 #include <string>
-#include "core.h"
+#include "core.hpp"
+#include "XOR.hpp"
 
 void HotkeyThread()
 {
-	bool isF1Held = false, isF2Held = false, isF3Held = false, isF4Held = false, isF5Held = false;
-    bool isPlusHeld = false, isMinusHeld = false;
+    bool isF1Held = false, isF2Held = false, isF3Held = false, isF4Held = false, isF5Held = false;
+    bool isPlusHeld = false, isMinusHeld = false, isTildeHeld = false;
 
     while (true)
     {
@@ -46,7 +47,10 @@ void HotkeyThread()
                 macroMode = (macroMode == 1) ? 2 : 1;
                 if (hUIMacroMode)
                 {
-                    std::string txt = "Macro Mode: " + std::string(macroMode == 1 ? "Scope 3Q" : "3Q");
+                    std::string txt = XOR("Macro Mode: ");
+                    if (macroMode == 1) txt += XOR("Scope 3Q");
+                    else txt += XOR("3Q");
+
                     SetWindowTextA(hUIMacroMode, txt.c_str());
                 }
             }
@@ -64,7 +68,10 @@ void HotkeyThread()
                 crosshairMode = (crosshairMode == 1) ? 2 : 1;
                 if (hUICrosshairMode)
                 {
-                    std::string txt = "Crosshair: " + std::string(crosshairMode == 1 ? "DOT" : "PLUS");
+                    std::string txt = XOR("Crosshair: ");
+                    if (crosshairMode == 1) txt += XOR("DOT");
+                    else txt += XOR("PLUS");
+
                     SetWindowTextA(hUICrosshairMode, txt.c_str());
                 }
             }
@@ -81,7 +88,8 @@ void HotkeyThread()
                 isF5Held = true;
                 crosshairColorIndex++;
 
-                if (crosshairColorIndex > 5) {
+                if (crosshairColorIndex > 5)
+                {
                     crosshairColorIndex = 0;
                 }
 
@@ -90,14 +98,14 @@ void HotkeyThread()
                     std::string colorName = "";
                     switch (crosshairColorIndex)
                     {
-                        case 0: colorName = "Green"; break;
-                        case 1: colorName = "Red"; break;
-                        case 2: colorName = "Cyan"; break;
-                        case 3: colorName = "Yellow"; break;
-                        case 4: colorName = "Magenta"; break;
-                        case 5: colorName = "White"; break;
+                        case 0: colorName = XOR("Green"); break;
+                        case 1: colorName = XOR("Red"); break;
+                        case 2: colorName = XOR("Cyan"); break;
+                        case 3: colorName = XOR("Yellow"); break;
+                        case 4: colorName = XOR("Magenta"); break;
+                        case 5: colorName = XOR("White"); break;
                     }
-                    std::string txt = "Color: " + colorName;
+                    std::string txt = std::string(XOR("Color: ")) + colorName;
                     SetWindowTextA(hTextCrosshairColor, txt.c_str());
                 }
             }
@@ -105,6 +113,23 @@ void HotkeyThread()
         else
         {
             isF5Held = false;
+        }
+
+        if (GetAsyncKeyState(VK_OEM_3) & 0x8000) // "`" key
+        {
+            if (!isTildeHeld)
+            {
+                isTildeHeld = true;
+                espNameEnabled = !espNameEnabled;
+
+                ToggleNameTagESP(espNameEnabled);
+
+                if (hBtnEspName) SendMessageA(hBtnEspName, BM_SETCHECK, espNameEnabled ? BST_CHECKED : BST_UNCHECKED, 0);
+            }
+        }
+        else
+        {
+            isTildeHeld = false;
         }
 
         bool plusPressed = (GetAsyncKeyState(VK_ADD) & 0x8000) || (GetAsyncKeyState(VK_OEM_PLUS) & 0x8000);
@@ -117,7 +142,10 @@ void HotkeyThread()
                 if (hUIDelay) SetWindowTextA(hUIDelay, std::to_string(delayMs).c_str());
             }
         }
-        else { isPlusHeld = false; }
+        else
+        {
+            isPlusHeld = false;
+        }
 
         bool minusPressed = (GetAsyncKeyState(VK_SUBTRACT) & 0x8000) || (GetAsyncKeyState(VK_OEM_MINUS) & 0x8000);
         if (minusPressed)

@@ -1,6 +1,6 @@
-#include "core.h"
-
-const char* TARGET_WINDOW = "Point Blank";
+#include "core.hpp"
+#include "XOR.hpp"
+#include <string>
 
 static void SendKey(WORD wVk)
 {
@@ -32,6 +32,8 @@ static void SendMouseClick(DWORD dwDown, DWORD dwUp)
 
 void MacroThread()
 {
+    std::string targetWindow = XOR("Point Blank");
+
     bool isLeftHeld = false;
     bool isRightHeld = false;
 
@@ -43,7 +45,7 @@ void MacroThread()
         Sleep(1);
         if (checkCounter++ >= 1000)
         {
-            gameHwnd = FindWindowA(NULL, TARGET_WINDOW);
+            gameHwnd = FindWindowA(NULL, targetWindow.c_str());
             checkCounter = 0;
         }
 
