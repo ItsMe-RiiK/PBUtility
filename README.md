@@ -26,3 +26,4 @@ The application.exe would appear in Release folder
 - f3 to change macro mode (3Q Scope or just 3Q)
 - f4 to change crosshair mode (dot and plus)
 - f5 to change crosshair color
+- ` to enable/disable ESP nametag
